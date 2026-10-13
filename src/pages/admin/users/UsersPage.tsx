@@ -7,6 +7,7 @@ type UserStatus = "Active" | "Suspended"
 type StaffUser = { name: string; email: string; role: string; branch: string; status: UserStatus }
 
 const roles = ["Super Admin", "Manager", "Staff", "Cashier"]
+const branches = ["Head Office", "Airport branch", "Westlands", "CBD branch"]
 const initialUsers: StaffUser[] = [
   { name: "Amara Njeri", email: "amara.njeri@motion.example", role: "Super Admin", branch: "Head Office", status: "Active" },
   { name: "Daniel Otieno", email: "daniel.otieno@motion.example", role: "Manager", branch: "Airport branch", status: "Active" },
@@ -101,7 +102,7 @@ function UsersPage() {
       </div>
       <div className="flex items-center justify-between border-t border-[#edf0e9] px-6 py-3 text-[11px] text-[#8c9489]"><span>Showing {filteredUsers.length} of {users.length} users</span><span>Demo data · changes aren’t saved to a backend</span></div>
     </section>
-    {showForm && <AddUserForm roles={roles} onClose={() => setShowForm(false)} onSave={addUser} />}
+    {showForm && <AddUserForm roles={roles} branches={branches} onClose={() => setShowForm(false)} onSave={addUser} />}
   </AdminLayout>
 }
 

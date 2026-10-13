@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Icon } from "../AdminSidebar"
-import AddCustomerForm from "../forms/AddCustomerForm"
+import AddCustomerForm, { type AddCustomerFormValues } from "../forms/AddCustomerForm"
 import AdminLayout from "../layout/AdminLayout"
 
 type Customer = { customer: string; email: string; phone: string; rentals: string; status: string }
@@ -35,12 +35,12 @@ function CustomersPage() {
   const filteredRecords = records.filter((record) => Object.values(record).join(" ").toLowerCase().includes(search.toLowerCase()))
   const activeCount = records.filter((record) => record.status === "Active").length
 
-  const addCustomer = (values: Record<string, string>) => {
+  const addCustomer = (values: AddCustomerFormValues) => {
     setRecords((current) => [{
-      customer: values.customer,
+      customer: [values.firstName, values.middleName, values.lastName].filter(Boolean).join(" "),
       email: values.email,
-      phone: values.phone,
-      rentals: values.rentals ?? "—",
+      phone: values.phoneNumber,
+      rentals: "—",
       status: "Active",
     }, ...current])
     setShowForm(false)

@@ -29,6 +29,10 @@ export function Icon({ name, className = "h-5 w-5" }: { name: IconName; classNam
 const navigation = [
   { label: "Overview", to: "/admin", icon: "grid" as const, end: true },
   { label: "Cars", to: "/admin/cars", icon: "car" as const },
+  { label: "Rentals", to: "/admin/rentals", icon: "clock" as const },
+  { label: "Pricing", to: "/admin/pricing", icon: "chart" as const },
+  { label: "Pricing areas", to: "/admin/pricing-areas", icon: "map" as const },
+  { label: "Vehicle types", to: "/admin/vehicle-types", icon: "car" as const },
   { label: "Customers", to: "/admin/customers", icon: "users" as const },
   { label: "Users", to: "/admin/users", icon: "users" as const },
   { label: "Maintenance", to: "/admin/maintenance", icon: "wrench" as const },
@@ -53,7 +57,7 @@ function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void })
       <div className="mt-11 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Workspace</div>
       <nav aria-label="Main navigation" className="mt-3 space-y-1">
         {navigation.map((item) => {
-          const active = item.end ? pathname === item.to : pathname.startsWith(item.to)
+          const active = item.end ? pathname === item.to : pathname === item.to || pathname.startsWith(`${item.to}/`)
           return <NavLink key={item.label} to={item.to} end={item.end} onClick={onClose} className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-colors ${active ? "bg-[#c8ef73] font-semibold text-[#192820]" : "text-white/65 hover:bg-white/[0.07] hover:text-white"}`}>
             <Icon name={item.icon} className="h-[18px] w-[18px]" /><span>{item.label}</span>
           </NavLink>

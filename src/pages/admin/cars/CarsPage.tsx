@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { Icon } from "../AdminSidebar"
-import AddCarForm from "../forms/AddCarForm"
+import AddCarForm, { type AddCarFormValues } from "../forms/AddCarForm"
 import AdminLayout from "../layout/AdminLayout"
+import { branches, vehicleTypeOptions } from "../fleetOptions"
 
 type Car = { vehicle: string; registration: string; category: string; branch: string; status: string }
 const columns: { key: keyof Car; label: string }[] = [
@@ -36,8 +37,16 @@ function CarsPage() {
   const availableCount = records.filter((record) => record.status === "Available").length
   const maintenanceCount = records.filter((record) => record.status === "Maintenance").length
 
-  const addCar = (values: Record<string, string>) => {
-    setRecords((current) => [{ vehicle: values.vehicle, registration: values.registration, category: values.category, branch: values.branch, status: "Available" }, ...current])
+  const addCar = (values: AddCarFormValues) => {
+    const vehicleType = vehicleTypeOptions.find((type) => type.id === values.vehicleTypeId)
+    const branch = branches.find((item) => item.id === values.branchId)
+    setRecords((current) => [{
+      vehicle: `${values.make} ${values.model}`,
+      registration: values.plateNumber,
+      category: `${vehicleType?.name ?? "Vehicle"} · ${values.year}`,
+      branch: branch?.name ?? values.branchId,
+      status: values.status,
+    }, ...current])
     setShowForm(false)
   }
 
