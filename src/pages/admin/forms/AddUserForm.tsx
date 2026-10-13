@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react"
 import { Icon } from "../AdminSidebar"
+import type { CreateUserRequest } from "../../../features/users/users.api"
 
 type AddUserFormProps = {
     roles: string[]
     branches: string[]
     onClose: () => void
-    onSave: (values: Record<string, string>) => void
+    onSave: (values: CreateUserRequest) => Promise<void>
 }
 
 interface UserInformations {
@@ -25,6 +26,8 @@ function AddUserForm({ roles, branches, onClose, onSave }: AddUserFormProps) {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [passwordError, setPasswordError] = useState("")
+    const [submitError, setSubmitError] = useState("")
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [values, setValues] = useState<UserInformations>({
         firstName: "",
         middleName: "",
@@ -37,9 +40,9 @@ function AddUserForm({ roles, branches, onClose, onSave }: AddUserFormProps) {
         confirm_password: "",
     });
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const submit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        
+
         const userData: UserInformations = {
             ...values,
             middleName: values.middleName?.trim() || null,
@@ -50,12 +53,24 @@ function AddUserForm({ roles, branches, onClose, onSave }: AddUserFormProps) {
             return
         }
 
-        onSave({
-            name: [userData.firstName, userData.middleName, userData.lastName].filter(Boolean).join(" "),
-            email: userData.email,
-            role: roles[userData.role] ?? "",
-            branch: branches[userData.branch] ?? "",
-        })
+        setIsSubmitting(true)
+        setSubmitError("")
+        try {
+            await onSave({
+                firstName: userData.firstName,
+                middleName: userData.middleName,
+                lastName: userData.lastName,
+                role: roles[userData.role] ?? "",
+                phoneNumber: userData.phoneNumber,
+                branch: branches[userData.branch] ?? "",
+                email: userData.email,
+                password: userData.password,
+            })
+        } catch (error) {
+            setSubmitError(error instanceof Error ? error.message : "Unable to create user.")
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return <div role="presentation" className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
@@ -71,7 +86,7 @@ function AddUserForm({ roles, branches, onClose, onSave }: AddUserFormProps) {
                 <label className="block text-xs font-medium text-[#596257]">Password<span className="mt-1.5 flex h-10 items-center rounded-lg border border-[#e1e5dc] pr-2 focus-within:border-[#81945e]"><input required type={showPassword ? "text" : "password"} autoComplete="new-password" value={values.password} onChange={(event) => setValues((current) => ({ ...current, password: event.target.value }))} className="h-full min-w-0 flex-1 rounded-lg px-3 text-sm font-normal text-[#202720] outline-none" /><button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((visible) => !visible)} className="px-1 text-xs font-medium text-[#596257] hover:text-[#202720]">{showPassword ? "Hide" : "Show"}</button></span></label>
                 <label className="block text-xs font-medium text-[#596257]">Confirm Password<span className="mt-1.5 flex h-10 items-center rounded-lg border border-[#e1e5dc] pr-2 focus-within:border-[#81945e]"><input required type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" value={values.confirm_password} onChange={(event) => { setValues((current) => ({ ...current, confirm_password: event.target.value })); setPasswordError("") }} className="h-full min-w-0 flex-1 rounded-lg px-3 text-sm font-normal text-[#202720] outline-none" /><button type="button" aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"} onClick={() => setShowConfirmPassword((visible) => !visible)} className="px-1 text-xs font-medium text-[#596257] hover:text-[#202720]">{showConfirmPassword ? "Hide" : "Show"}</button></span>{passwordError && <span role="alert" className="mt-1 block text-[11px] text-[#a35e4b]">{passwordError}</span>}</label>
                 <label className="block text-xs font-medium text-[#596257]">Branch<select value={values.branch} onChange={(event) => setValues((current) => ({ ...current, branch: Number(event.target.value) }))} className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] bg-white px-3 text-sm font-normal text-[#202720] outline-none focus:border-[#81945e]">{branches.map((branch, index) => <option key={branch} value={index}>{branch}</option>)}</select></label>
-                <div className="col-span-full flex justify-end gap-2 border-t border-[#edf0e9] pt-4"><button type="button" onClick={onClose} className="rounded-lg border border-[#e1e5dc] px-4 py-2.5 text-xs font-semibold text-[#596257]">Cancel</button><button type="submit" className="rounded-lg bg-[#192820] px-4 py-2.5 text-xs font-semibold text-white">Create user</button></div>
+                <div className="col-span-full flex items-center justify-between gap-3 border-t border-[#edf0e9] pt-4">{submitError && <p role="alert" className="text-xs text-[#a35e4b]">{submitError}</p>}<div className="ml-auto flex gap-2"><button type="button" onClick={onClose} disabled={isSubmitting} className="rounded-lg border border-[#e1e5dc] px-4 py-2.5 text-xs font-semibold text-[#596257] disabled:opacity-50">Cancel</button><button type="submit" disabled={isSubmitting} className="rounded-lg bg-[#192820] px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-wait disabled:opacity-60">{isSubmitting ? "Creating…" : "Create user"}</button></div></div>
             </form>
         </section>
     </div>
