@@ -36,7 +36,7 @@ const navigation = [
   { label: "Customers", to: "/admin/customers", icon: "users" as const },
   { label: "Users", to: "/admin/users", icon: "users" as const },
   { label: "Maintenance", to: "/admin/maintenance", icon: "wrench" as const },
-  { label: "Locations", to: "/admin/locations", icon: "map" as const },
+  { label: "Branches", to: "/admin/branches", icon: "map" as const },
   { label: "Payments", to: "/admin/payments", icon: "wallet" as const },
 ]
 

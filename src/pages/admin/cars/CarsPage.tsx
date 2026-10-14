@@ -2,7 +2,8 @@ import { useState } from "react"
 import { Icon } from "../AdminSidebar"
 import AddCarForm, { type AddCarFormValues } from "../forms/AddCarForm"
 import AdminLayout from "../layout/AdminLayout"
-import { branches, vehicleTypeOptions } from "../fleetOptions"
+import { vehicleTypeOptions } from "../fleetOptions"
+import { getBranches } from "../../../features/branches/branches.store"
 
 type Car = { vehicle: string; registration: string; category: string; branch: string; status: string }
 const columns: { key: keyof Car; label: string }[] = [
@@ -39,7 +40,7 @@ function CarsPage() {
 
   const addCar = (values: AddCarFormValues) => {
     const vehicleType = vehicleTypeOptions.find((type) => type.id === values.vehicleTypeId)
-    const branch = branches.find((item) => item.id === values.branchId)
+    const branch = getBranches().find((item) => item.id === values.branchId)
     setRecords((current) => [{
       vehicle: `${values.make} ${values.model}`,
       registration: values.plateNumber,

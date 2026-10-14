@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react"
 import { Icon } from "../AdminSidebar"
-import { branches, vehicleTypeOptions } from "../fleetOptions"
+import { vehicleTypeOptions } from "../fleetOptions"
+import { getBranches } from "../../../features/branches/branches.store"
 
 export type AddCarFormValues = {
   plateNumber: string
@@ -35,6 +36,7 @@ const fieldClass = "mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] bg-whi
 const fileClass = "mt-1.5 block w-full rounded-lg border border-[#e1e5dc] bg-white text-xs text-[#596257] file:mr-3 file:border-0 file:border-r file:border-[#e1e5dc] file:bg-[#f8f9f6] file:px-3 file:py-2.5 file:text-xs file:font-medium file:text-[#596257]"
 
 function AddCarForm({ onClose, onSave }: AddCarFormProps) {
+  const [branches] = useState(() => getBranches().filter((branch) => branch.status === "Open"))
   const [values, setValues] = useState<AddCarFormValues>({
     plateNumber: "",
     vehicleCode: "",

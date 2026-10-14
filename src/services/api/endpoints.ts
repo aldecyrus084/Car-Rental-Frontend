@@ -1,4 +1,5 @@
 export const API_ENDPOINTS = {
-  users: "/users",
-  userStatus: (email: string) => `/users/${encodeURIComponent(email)}/status`,
+  users: "/User",
+  userRoles: "/user-role",
+  userStatus: (email: string) => `/User/${encodeURIComponent(email)}/status`,
 } as const

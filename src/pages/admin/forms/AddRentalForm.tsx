@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from "react"
 import { Icon } from "../AdminSidebar"
-import { branches } from "../fleetOptions"
+import { getBranches } from "../../../features/branches/branches.store"
 
 export type RentalFormValues = {
   rentalNumber: string
@@ -72,6 +72,7 @@ function generateRentalNumber() {
 }
 
 function AddRentalForm({ onClose, onSave }: AddRentalFormProps) {
+  const [branches] = useState(() => getBranches().filter((branch) => branch.status === "Open"))
   const [values, setValues] = useState<RentalFormValues>({
     rentalNumber: generateRentalNumber(),
     customerId: "",

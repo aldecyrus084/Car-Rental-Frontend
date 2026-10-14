@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react"
 import { Icon } from "../AdminSidebar"
 import type { CreateUserRequest } from "../../../features/users/users.api"
+import type { UserRole } from "../../../features/users/user-roles.api"
 
 type AddUserFormProps = {
-    roles: string[]
+    roles: UserRole[]
+    rolesLoadError: string
     branches: string[]
     onClose: () => void
     onSave: (values: CreateUserRequest) => Promise<void>
@@ -13,7 +15,7 @@ interface UserInformations {
     firstName: string;
     middleName: string | null;
     lastName: string;
-    role: number;
+    role: string;
     phoneNumber: string;
     branch: number;
     email: string;
@@ -22,7 +24,7 @@ interface UserInformations {
 }
 
 
-function AddUserForm({ roles, branches, onClose, onSave }: AddUserFormProps) {
+function AddUserForm({ roles, rolesLoadError, branches, onClose, onSave }: AddUserFormProps) {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [passwordError, setPasswordError] = useState("")
@@ -32,7 +34,7 @@ function AddUserForm({ roles, branches, onClose, onSave }: AddUserFormProps) {
         firstName: "",
         middleName: "",
         lastName: "",
-        role: 0,
+        role: "",
         phoneNumber: "",
         branch: 0,
         email: "",
@@ -60,7 +62,7 @@ function AddUserForm({ roles, branches, onClose, onSave }: AddUserFormProps) {
                 firstName: userData.firstName,
                 middleName: userData.middleName,
                 lastName: userData.lastName,
-                role: roles[userData.role] ?? "",
+                userRoleId: userData.role,
                 phoneNumber: userData.phoneNumber,
                 branch: branches[userData.branch] ?? "",
                 email: userData.email,
@@ -80,7 +82,7 @@ function AddUserForm({ roles, branches, onClose, onSave }: AddUserFormProps) {
                 <label className="block text-xs font-medium text-[#596257]">First Name<input required autoComplete="given-name" value={values.firstName.trim()} onChange={(event) => setValues((current) => ({ ...current, firstName: event.target.value }))} className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] px-3 text-sm font-normal text-[#202720] outline-none focus:border-[#81945e]" /></label>
                 <label className="block text-xs font-medium text-[#596257]">Middle Name<input autoComplete="additional-name" value={values.middleName?.trim() ?? ""} onChange={(event) => setValues((current) => ({ ...current, middleName: event.target.value }))} className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] px-3 text-sm font-normal text-[#202720] outline-none focus:border-[#81945e]" /></label>
                 <label className="block text-xs font-medium text-[#596257]">Last Name<input required autoComplete="family-name" value={values.lastName} onChange={(event) => setValues((current) => ({ ...current, lastName: event.target.value }))} className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] px-3 text-sm font-normal text-[#202720] outline-none focus:border-[#81945e]" /></label>
-                <label className="block text-xs font-medium text-[#596257]">Role<select value={values.role} onChange={(event) => setValues((current) => ({ ...current, role: Number(event.target.value) }))} className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] bg-white px-3 text-sm font-normal text-[#202720] outline-none focus:border-[#81945e]">{roles.map((role, index) => <option key={role} value={index}>{role}</option>)}</select></label>
+                <label className="block text-xs font-medium text-[#596257]">Role<select required value={values.role} disabled={roles.length === 0} onChange={(event) => setValues((current) => ({ ...current, role: event.target.value }))} className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] bg-white px-3 text-sm font-normal text-[#202720] outline-none focus:border-[#81945e] disabled:cursor-not-allowed disabled:bg-[#f3f4f1]"><option value="">{roles.length ? "Select a role" : "No active roles available"}</option>{roles.map((role) => <option key={role.userRoleId} value={role.userRoleId}>{role.name}</option>)}</select>{rolesLoadError && <span role="alert" className="mt-1 block text-[11px] text-[#a35e4b]">{rolesLoadError}</span>}</label>
                 <label className="block text-xs font-medium text-[#596257]">Phone Number<input required autoComplete="tel" value={values.phoneNumber} onChange={(event) => setValues((current) => ({ ...current, phoneNumber: event.target.value }))} className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] px-3 text-sm font-normal text-[#202720] outline-none focus:border-[#81945e]" /></label>
                 <label className="block text-xs font-medium text-[#596257]">Email<input required autoComplete="email" value={values.email.trim()} onChange={(event) => setValues((current) => ({ ...current, email: event.target.value }))} className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] px-3 text-sm font-normal text-[#202720] outline-none focus:border-[#81945e]" /></label>
                 <label className="block text-xs font-medium text-[#596257]">Password<span className="mt-1.5 flex h-10 items-center rounded-lg border border-[#e1e5dc] pr-2 focus-within:border-[#81945e]"><input required type={showPassword ? "text" : "password"} autoComplete="new-password" value={values.password} onChange={(event) => setValues((current) => ({ ...current, password: event.target.value }))} className="h-full min-w-0 flex-1 rounded-lg px-3 text-sm font-normal text-[#202720] outline-none" /><button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((visible) => !visible)} className="px-1 text-xs font-medium text-[#596257] hover:text-[#202720]">{showPassword ? "Hide" : "Show"}</button></span></label>
