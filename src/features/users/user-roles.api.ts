@@ -16,6 +16,12 @@ type ApiUserRolesResponse = UserRole[] | {
   isSuccess?: boolean
   data: UserRole[]
 }
+type ApiUserRoleResponse = UserRole | { message?: string; isSuccess?: boolean; data: UserRole }
+
+export type CreateUserRoleRequest = {
+  name: string
+  description: string
+}
 
 function isUserRole(value: unknown): value is UserRole {
   if (typeof value !== "object" || value === null) return false
@@ -49,12 +55,50 @@ export function cacheUserRoles(roles: UserRole[]): void {
   document.cookie = `${USER_ROLES_COOKIE}=${encodeURIComponent(JSON.stringify(roles))}; Path=/; Max-Age=${USER_ROLES_COOKIE_MAX_AGE}; SameSite=Lax${secure}`
 }
 
-export async function getUserRoles(signal?: AbortSignal): Promise<UserRole[]> {
+export async function getAllUserRoles(signal?: AbortSignal): Promise<UserRole[]> {
   const response = await apiRequest<ApiUserRolesResponse>(API_ENDPOINTS.userRoles, { signal })
   if (!Array.isArray(response) && response.isSuccess === false) {
     throw new Error(response.message || "Unable to load user roles.")
   }
 
-  const roles = Array.isArray(response) ? response : response.data
+  return Array.isArray(response) ? response : response.data
+}
+
+export async function getUserRoles(signal?: AbortSignal): Promise<UserRole[]> {
+  const roles = await getAllUserRoles(signal)
   return roles.filter((role) => role.isActive)
+}
+
+export async function createUserRole(values: CreateUserRoleRequest): Promise<UserRole> {
+  const response = await apiRequest<ApiUserRoleResponse>(API_ENDPOINTS.userRoles, {
+    method: "POST",
+    body: JSON.stringify({ ...values, isActive: true }),
+  })
+  if (typeof response === "object" && response !== null && "isSuccess" in response && response.isSuccess === false) {
+    throw new Error(response.message || "Unable to create user role.")
+  }
+
+  if (typeof response === "object" && response !== null && "data" in response && isUserRole(response.data)) {
+    return response.data
+  }
+  if (isUserRole(response)) return response
+  throw new Error("The server did not return the created role.")
+}
+
+export async function updateUserRole(role: UserRole): Promise<{ role: UserRole; message: string }> {
+  const response = await apiRequest<ApiUserRoleResponse>(API_ENDPOINTS.userRole(role.userRoleId), {
+    method: "PUT",
+    body: JSON.stringify(role),
+  })
+  if (typeof response === "object" && response !== null && "isSuccess" in response && response.isSuccess === false) {
+    throw new Error(response.message || "Unable to update user role.")
+  }
+
+  const message = typeof response === "object" && response !== null && "message" in response && typeof response.message === "string"
+    ? response.message
+    : ""
+  if (typeof response === "object" && response !== null && "data" in response && isUserRole(response.data)) {
+    return { role: response.data, message }
+  }
+  return { role: isUserRole(response) ? response : role, message }
 }

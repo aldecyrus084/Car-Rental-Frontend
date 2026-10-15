@@ -12,6 +12,7 @@ import VehicleTypesPage from "./pages/admin/vehicle-types/VehicleTypesPage"
 import RentalsPage from "./pages/admin/rentals/RentalsPage"
 import PricingPage from "./pages/admin/pricing/PricingPage"
 import PricingAreasPage from "./pages/admin/pricing-areas/PricingAreasPage"
+import RolesPage from "./pages/admin/roles/RolesPage"
 import { cacheUserRoles, getUserRoles, readCachedUserRoles, type UserRole } from "./features/users/user-roles.api"
 
 function App() {
@@ -51,6 +52,15 @@ function App() {
         <Route path="/admin/locations" element={<Navigate to="/admin/branches" replace />} />
         <Route path="/admin/payments" element={<PaymentsPage />} />
         <Route path="/admin/users" element={<UsersPage roles={userRoles} rolesLoadError={rolesLoadError} />} />
+        <Route path="/admin/roles" element={<RolesPage onRolesUpdated={(role) => {
+          setUserRoles((current) => {
+            const updatedRoles = current.some((item) => item.userRoleId === role.userRoleId)
+              ? current.map((item) => item.userRoleId === role.userRoleId ? role : item).filter((item) => item.isActive)
+              : role.isActive ? [...current, role] : current
+            cacheUserRoles(updatedRoles)
+            return updatedRoles
+          })
+        }} />} />
         <Route path="/admin/:section" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<div>Not Found</div>} />
       </Routes>

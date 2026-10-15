@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom"
 import type { ReactNode } from "react"
 
-type IconName = "grid" | "car" | "chart" | "users" | "wrench" | "map" | "wallet" | "search" | "bell" | "menu" | "close" | "download" | "arrow" | "pin" | "clock" | "plus"
+type IconName = "grid" | "car" | "chart" | "users" | "shield" | "wrench" | "map" | "wallet" | "search" | "bell" | "menu" | "close" | "download" | "arrow" | "pin" | "clock" | "plus"
 
 export function Icon({ name, className = "h-5 w-5" }: { name: IconName; className?: string }) {
   const paths: Record<IconName, ReactNode> = {
@@ -9,6 +9,7 @@ export function Icon({ name, className = "h-5 w-5" }: { name: IconName; classNam
     car: <><path d="m5 11 1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11" /><path d="M3 11h18v7H3z" /><path d="M6 18v2m12-2v2M3 14h2m14 0h2" /><circle cx="7" cy="15" r="1" /><circle cx="17" cy="15" r="1" /></>,
     chart: <><path d="M3 3v18h18" /><path d="m7 14 4-4 4 3 6-7" /></>,
     users: <><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="10" cy="7" r="4" /><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
+    shield: <><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" /><path d="m9 12 2 2 4-4" /></>,
     wrench: <><path d="M14.7 6.3a5 5 0 0 0-6.6 6.6L3 18l3 3 5.1-5.1a5 5 0 0 0 6.6-6.6L14 12l-2-2 2.7-3.7Z" /><path d="m16 8 3-3" /></>,
     map: <><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z" /><path d="M9 3v15m6-12v15" /></>,
     wallet: <><rect x="3" y="5" width="18" height="15" rx="2" /><path d="M3 9h18M16 14h2" /><path d="M6 5V3h12v2" /></>,
@@ -35,6 +36,7 @@ const navigation = [
   { label: "Vehicle types", to: "/admin/vehicle-types", icon: "car" as const },
   { label: "Customers", to: "/admin/customers", icon: "users" as const },
   { label: "Users", to: "/admin/users", icon: "users" as const },
+  { label: "Roles", to: "/admin/roles", icon: "shield" as const },
   { label: "Maintenance", to: "/admin/maintenance", icon: "wrench" as const },
   { label: "Branches", to: "/admin/branches", icon: "map" as const },
   { label: "Payments", to: "/admin/payments", icon: "wallet" as const },
