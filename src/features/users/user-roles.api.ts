@@ -86,7 +86,7 @@ export async function createUserRole(values: CreateUserRoleRequest): Promise<Use
 }
 
 export async function updateUserRole(role: UserRole): Promise<{ role: UserRole; message: string }> {
-  const response = await apiRequest<ApiUserRoleResponse>(API_ENDPOINTS.userRole(role.userRoleId), {
+  const response = await apiRequest<ApiUserRoleResponse>(`${API_ENDPOINTS.userRole(role.userRoleId)}/toggleStatus`, {
     method: "PUT",
     body: JSON.stringify(role),
   })
