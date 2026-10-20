@@ -54,7 +54,7 @@ function RentalsPage() {
   const overdueCount = rentals.filter((rental) => rental.status === "Overdue").length
 
   const addRental = (values: RentalFormValues) => {
-    const branch = getBranches().find((item) => item.id === values.branchId)
+    const branch = getBranches().find((item) => item.branchId === values.branchId)
     const customer = rentalCustomerOptions.find((item) => item.id === values.customerId)
     setRentals((current) => [{
       rentalNumber: values.rentalNumber,

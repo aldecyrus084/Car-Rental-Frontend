@@ -36,7 +36,7 @@ const fieldClass = "mt-1.5 h-10 w-full rounded-lg border border-[#e1e5dc] bg-whi
 const fileClass = "mt-1.5 block w-full rounded-lg border border-[#e1e5dc] bg-white text-xs text-[#596257] file:mr-3 file:border-0 file:border-r file:border-[#e1e5dc] file:bg-[#f8f9f6] file:px-3 file:py-2.5 file:text-xs file:font-medium file:text-[#596257]"
 
 function AddCarForm({ onClose, onSave }: AddCarFormProps) {
-  const [branches] = useState(() => getBranches().filter((branch) => branch.status === "Open"))
+  const [branches] = useState(() => getBranches().filter((branch) => branch.isActive))
   const [values, setValues] = useState<AddCarFormValues>({
     plateNumber: "",
     vehicleCode: "",
@@ -92,7 +92,7 @@ function AddCarForm({ onClose, onSave }: AddCarFormProps) {
             <label className="block text-xs font-medium text-[#596257]">Status<select value={values.status} onChange={(event) => setValues((current) => ({ ...current, status: event.target.value }))} className={fieldClass}><option>Available</option><option>On rent</option><option>Maintenance</option><option>Unavailable</option></select></label>
             <label className="block text-xs font-medium text-[#596257]">Registration expiry date<input required type="date" value={values.registrationExpiryDate} onChange={(event) => setValues((current) => ({ ...current, registrationExpiryDate: event.target.value }))} className={fieldClass} /></label>
             <label className="block text-xs font-medium text-[#596257]">Insurance expiry date<input required type="date" value={values.insuranceExpiryDate} onChange={(event) => setValues((current) => ({ ...current, insuranceExpiryDate: event.target.value }))} className={fieldClass} /></label>
-            <label className="block text-xs font-medium text-[#596257]">Branch<select required value={values.branchId} onChange={(event) => setValues((current) => ({ ...current, branchId: event.target.value }))} className={fieldClass}><option value="">Select branch</option>{branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select><span className="mt-1 block text-[10px] font-normal text-[#899187]">Submits the branch ID.</span></label>
+            <label className="block text-xs font-medium text-[#596257]">Branch<select required value={values.branchId} onChange={(event) => setValues((current) => ({ ...current, branchId: event.target.value }))} className={fieldClass}><option value="">Select branch</option>{branches.map((branch) => <option key={branch.branchId} value={branch.branchId}>{branch.name}</option>)}</select><span className="mt-1 block text-[10px] font-normal text-[#899187]">Submits the branch ID.</span></label>
           </div>
         </section>
 

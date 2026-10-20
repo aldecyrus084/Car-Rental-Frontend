@@ -40,7 +40,7 @@ function CarsPage() {
 
   const addCar = (values: AddCarFormValues) => {
     const vehicleType = vehicleTypeOptions.find((type) => type.id === values.vehicleTypeId)
-    const branch = getBranches().find((item) => item.id === values.branchId)
+    const branch = getBranches().find((item) => item.branchId === values.branchId)
     setRecords((current) => [{
       vehicle: `${values.make} ${values.model}`,
       registration: values.plateNumber,

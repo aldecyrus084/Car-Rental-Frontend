@@ -1,43 +1,39 @@
-export type BranchStatus = "Open" | "Closed"
-
 export type Branch = {
-  id: string
+  branchId: string
   name: string
-  manager: string
   address: string
-  status: BranchStatus
+  city: string
+  province: string
+  contactNumber: string
+  isActive: boolean
 }
 
-export type BranchValues = Omit<Branch, "id">
+export type BranchValues = Omit<Branch, "branchId">
 
 const STORAGE_KEY = "motionBranches"
-
-const defaultBranches: Branch[] = [
-  { id: "1", name: "Westlands", manager: "Grace Wanjiku", address: "Waiyaki Way, Nairobi", status: "Open" },
-  { id: "2", name: "Airport branch", manager: "Daniel Otieno", address: "JKIA arrivals, Nairobi", status: "Open" },
-  { id: "3", name: "CBD branch", manager: "Faith Mwangi", address: "Kimathi Street, Nairobi", status: "Open" },
-]
 
 function isBranch(value: unknown): value is Branch {
   if (typeof value !== "object" || value === null) return false
   const branch = value as Partial<Branch>
-  return typeof branch.id === "string"
+  return typeof branch.branchId === "string"
     && typeof branch.name === "string"
-    && typeof branch.manager === "string"
     && typeof branch.address === "string"
-    && (branch.status === "Open" || branch.status === "Closed")
+    && typeof branch.city === "string"
+    && typeof branch.province === "string"
+    && typeof branch.contactNumber === "string"
+    && typeof branch.isActive === "boolean"
 }
 
 export function getBranches(): Branch[] {
-  if (typeof window === "undefined") return defaultBranches
+  if (typeof window === "undefined") return []
 
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY)
-    if (!stored) return defaultBranches
+    if (!stored) return []
     const branches: unknown = JSON.parse(stored)
-    return Array.isArray(branches) && branches.every(isBranch) ? branches : defaultBranches
+    return Array.isArray(branches) && branches.every(isBranch) ? branches : []
   } catch {
-    return defaultBranches
+    return []
   }
 }
 

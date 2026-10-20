@@ -34,7 +34,7 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
   const [statusFilter, setStatusFilter] = useState("All statuses")
   const [showForm, setShowForm] = useState(false)
   const [selectedUser, setSelectedUser] = useState<StaffUser | null>(null)
-  const [branches, setBranches] = useState(() => getBranches().filter((branch) => branch.status === "Open").map((branch) => branch.name))
+  const [branches, setBranches] = useState(() => getBranches().filter((branch) => branch.isActive).map((branch) => branch.name))
 
   useEffect(() => {
     const controller = new AbortController()
@@ -70,7 +70,7 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
   return <AdminLayout eyebrow="Administration / Users" title={<>MOTION <span className="font-normal text-[#899187]">· User management</span></>}>
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-[#8b9388]">Team administration</p><h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]">Users</h2><p className="mt-1.5 text-sm text-[#798177]">Manage staff access, roles, and branch assignments.</p></div>
-      <button onClick={() => { setBranches(getBranches().filter((branch) => branch.status === "Open").map((branch) => branch.name)); setShowForm(true) }} className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#192820] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#293b30]"><Icon name="plus" className="h-4 w-4" />Add user</button>
+      <button onClick={() => { setBranches(getBranches().filter((branch) => branch.isActive).map((branch) => branch.name)); setShowForm(true) }} className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#192820] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#293b30]"><Icon name="plus" className="h-4 w-4" />Add user</button>
     </div>
 
     <section aria-label="User summary" className="mt-7 grid gap-3 sm:grid-cols-3">

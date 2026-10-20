@@ -46,16 +46,10 @@ function RolesPage({ onRolesUpdated }: RolesPageProps) {
     setIsSaving(true)
     setSaveError("")
     try {
-      const savedRole = isCreating
-        ? await createUserRole(values)
-        : selectedRole
-          ? (await updateUserRole({ ...selectedRole, ...values })).role
-          : null
+      const savedRole = isCreating ? await createUserRole(values) : selectedRole ? (await updateUserRole({ ...selectedRole, ...values })).role : null
       if (!savedRole) return
 
-      setRoles((current) => isCreating
-        ? [savedRole, ...current]
-        : current.map((role) => role.userRoleId === savedRole.userRoleId ? savedRole : role))
+      setRoles((current) => isCreating ? [savedRole, ...current] : current.map((role) => role.userRoleId === savedRole.userRoleId ? savedRole : role))
       onRolesUpdated(savedRole)
       if (isCreating) {
         setIsCreating(false)

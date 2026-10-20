@@ -33,7 +33,7 @@ export type CreateUserRequest = {
 }
 
 type ApiListResponse<T> = T[] | { message?: string; isSuccess?: boolean; data: T[] }
-type ApiResponse<T> = T | { data: T }
+type ApiResponse<T> = T | { message?: string; isSuccess?: boolean; data: T }
 
 function toStaffUser(user: ApiUser): StaffUser {
   return {
