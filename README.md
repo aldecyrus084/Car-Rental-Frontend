@@ -38,9 +38,10 @@ The users screen expects these endpoints:
 
 - `GET /users` returns a `StaffUser[]` or `{ "data": StaffUser[] }`.
 - `POST /users` accepts first/middle/last name, role and branch labels, phone number, email, and password; it returns the created `StaffUser` or `{ "data": StaffUser }`.
-- `PATCH /users/{email}/status` accepts `{ "status": "Active" | "Suspended" }` and returns the updated `StaffUser` or `{ "data": StaffUser }`.
+- `PUT /users/{email}` accepts the editable user fields and `isActive`; password is optional and omitted when it should remain unchanged. It returns the updated user or `{ "data": StaffUser }`.
+- `PATCH /users/{email}/status` accepts `{ "status": "Active" | "Inactive" }` and returns the updated `StaffUser` or `{ "data": StaffUser }`.
 
-Each `StaffUser` response contains `name`, `email`, `role`, `branch`, and `status`. Endpoint paths are centralized in `src/services/api/endpoints.ts`; feature-specific request functions live in `src/features/users/users.api.ts`, and shared HTTP behavior lives in `src/services/api/client.ts`. The API must allow credentialed requests from the frontend origin when using cookie-based authentication.
+The update endpoint identifies users by their current email address; user IDs are not editable or sent by the form. Each `StaffUser` response contains name, email, role, branch, phone number, and status. Endpoint paths are centralized in `src/services/api/endpoints.ts`; feature-specific request functions live in `src/features/users/users.api.ts`, and shared HTTP behavior lives in `src/services/api/client.ts`. The API must allow credentialed requests from the frontend origin when using cookie-based authentication.
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.

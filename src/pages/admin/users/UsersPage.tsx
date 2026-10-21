@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../AdminSidebar"
 import AddUserForm from "../forms/AddUserForm"
+import UpdateUserForm from "../forms/UpdateUserForm"
 import AdminLayout from "../layout/AdminLayout"
-import { createUser, getUsers, type StaffUser } from "../../../features/users/users.api"
+import { createUser, getUsers, updateUser, type StaffUser } from "../../../features/users/users.api"
 import type { UserRole } from "../../../features/users/user-roles.api"
 import { getBranches } from "../../../features/branches/branches.store"
 
@@ -33,6 +34,7 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
   const [roleFilter, setRoleFilter] = useState("All roles")
   const [statusFilter, setStatusFilter] = useState("All statuses")
   const [showForm, setShowForm] = useState(false)
+  const [editingUser, setEditingUser] = useState<StaffUser | null>(null)
   const [selectedUser, setSelectedUser] = useState<StaffUser | null>(null)
   const [branches, setBranches] = useState(() => getBranches().filter((branch) => branch.isActive).map((branch) => branch.name))
 
@@ -65,6 +67,13 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
     const user = await createUser(values)
     setUsers((current) => [user, ...current])
     setShowForm(false)
+  }
+
+  const saveUser = async (values: Parameters<typeof updateUser>[1]) => {
+    if (!editingUser) return
+    const updatedUser = await updateUser(editingUser.userId, values)
+    setUsers((current) => current.map((user) => user.userId === editingUser.userId ? updatedUser : user))
+    setEditingUser(null)
   }
 
   return <AdminLayout eyebrow="Administration / Users" title={<>MOTION <span className="font-normal text-[#899187]">· User management</span></>}>
@@ -101,7 +110,7 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
               <td className="px-5 py-4 text-[#687166]">{user.phoneNumber}</td>
               <td className="px-5 py-4"><span className="inline-flex rounded-md bg-[#f1f3ee] px-2.5 py-1 text-[10px] font-medium text-[#596653]">{user.role}</span></td>
               <td className="px-5 py-4"><span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium ${user.status === "Active" ? "bg-[#edf5e5] text-[#638046]" : "bg-[#f8ece8] text-[#a35e4b]"}`}><span className="h-1.5 w-1.5 rounded-full bg-current" />{user.status}</span></td>
-              <td className="px-5 py-4 text-right"><div className="inline-flex items-center gap-1"><button type="button" disabled title="Connect an update endpoint to enable this action" className="rounded-md border border-[#e6e9e1] px-2 py-1.5 text-[10px] font-medium text-[#9aa095] disabled:cursor-not-allowed">Update</button><button type="button" disabled title="Connect a delete endpoint to enable this action" className="rounded-md border border-[#e6e9e1] px-2 py-1.5 text-[10px] font-medium text-[#9aa095] disabled:cursor-not-allowed">Delete</button><button type="button" onClick={() => setSelectedUser(user)} className="rounded-md border border-[#e6e9e1] px-2 py-1.5 text-[10px] font-medium text-[#596257] hover:bg-[#f8f9f6]">View</button></div></td>
+              <td className="px-5 py-4 text-right"><div className="inline-flex items-center gap-1"><button type="button" onClick={() => { setBranches(getBranches().filter((branch) => branch.isActive).map((branch) => branch.name)); setEditingUser(user) }} className="rounded-md border border-[#e6e9e1] px-2 py-1.5 text-[10px] font-medium text-[#596257] hover:bg-[#f8f9f6]">Update</button><button type="button" onClick={() => setSelectedUser(user)} className="rounded-md border border-[#e6e9e1] px-2 py-1.5 text-[10px] font-medium text-[#596257] hover:bg-[#f8f9f6]">View</button></div></td>
             </tr>)}
             {!isLoading && filteredUsers.length === 0 && <tr><td colSpan={6} className="px-6 py-12 text-center text-xs text-[#858d82]">{loadError ? "Users could not be loaded." : "No users match these filters."}</td></tr>}
           </tbody>
@@ -110,6 +119,7 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
       <div className="flex items-center justify-between border-t border-[#edf0e9] px-6 py-3 text-[11px] text-[#8c9489]"><span>Showing {filteredUsers.length} of {users.length} users</span><span>Live user directory</span></div>
     </section>
     {showForm && <AddUserForm roles={roles} rolesLoadError={rolesLoadError} branches={branches} onClose={() => setShowForm(false)} onSave={addUser} />}
+    {editingUser && <UpdateUserForm user={editingUser} roles={roles} branches={branches} onClose={() => setEditingUser(null)} onSave={saveUser} />}
     {selectedUser && <div role="presentation" className="fixed inset-0 z-50 grid place-items-center bg-[#101713]/60 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedUser(null) }}>
       <section role="dialog" aria-modal="true" aria-labelledby="user-details-title" className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/30 bg-white shadow-[0_24px_80px_-24px_rgba(15,25,19,0.55)]">
         <header className="bg-[#192820] px-6 py-6 text-white sm:px-7">

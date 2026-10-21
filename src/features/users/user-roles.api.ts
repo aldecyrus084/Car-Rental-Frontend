@@ -16,7 +16,11 @@ type ApiUserRolesResponse = UserRole[] | {
   isSuccess?: boolean
   data: UserRole[]
 }
+
+
 type ApiUserRoleResponse = UserRole | { message?: string; isSuccess?: boolean; data: UserRole }
+
+
 
 export type CreateUserRoleRequest = {
   name: string
