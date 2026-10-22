@@ -1,10 +1,12 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Icon } from "../AdminSidebar"
 import AddCustomerForm, { type AddCustomerFormValues } from "../forms/AddCustomerForm"
 import AdminLayout from "../layout/AdminLayout"
+import { getCustomers } from "../../../features/customers/customers.api"
 
-type Customer = { customer: string; email: string; phone: string; rentals: string; status: string }
-const columns: { key: keyof Customer; label: string }[] = [
+type Customer = { customerId?: string; customer: string; email: string; phone: string; rentals: string; status: string }
+type CustomerColumn = Exclude<keyof Customer, "customerId">
+const columns: { key: CustomerColumn; label: string }[] = [
   { key: "customer", label: "Customer" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone" },
@@ -24,14 +26,35 @@ function exportCustomers(records: Customer[]) {
 }
 
 function CustomersPage() {
-  const [records, setRecords] = useState<Customer[]>([
-    { customer: "Maya Johnson", email: "maya.johnson@example.com", phone: "+254 712 340 821", rentals: "8 rentals", status: "Active" },
-    { customer: "Noah Williams", email: "noah.w@example.com", phone: "+254 733 186 402", rentals: "3 rentals", status: "Active" },
-    { customer: "Olivia Brown", email: "olivia.b@example.com", phone: "+254 701 509 277", rentals: "5 rentals", status: "Active" },
-    { customer: "Ethan Davis", email: "ethan.d@example.com", phone: "+254 728 411 650", rentals: "1 rental", status: "Review" },
-  ])
+  const [records, setRecords] = useState<Customer[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
   const [search, setSearch] = useState("")
   const [showForm, setShowForm] = useState(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getCustomers(controller.signal)
+      .then((customers) => setRecords(customers.map((customer) => ({
+        customerId: customer.customerId,
+        customer: customer.fullName,
+        email: customer.email,
+        phone: customer.contactNumber,
+        rentals: `${customer.rentals} ${customer.rentals === 1 ? "rental" : "rentals"}`,
+        status: customer.status,
+      }))))
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setLoadError(error instanceof Error ? error.message : "Unable to load customers.")
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false)
+      })
+
+    return () => controller.abort()
+  }, [])
+
   const filteredRecords = records.filter((record) => Object.values(record).join(" ").toLowerCase().includes(search.toLowerCase()))
   const activeCount = records.filter((record) => record.status === "Active").length
 
@@ -59,6 +82,7 @@ function CustomersPage() {
     </section>
 
     <section className="mt-4 rounded-xl border border-[#e7e9e2] bg-white">
+      {loadError && <p role="alert" className="border-b border-[#f0d9d2] bg-[#fff8f5] px-5 py-3 text-xs text-[#a35e4b]">{loadError}</p>}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#edf0e9] px-5 py-4 sm:px-6">
         <div><h3 className="text-sm font-semibold">Customer records</h3><p className="mt-1 text-xs text-[#858d82]">Search and manage customer profiles</p></div>
         <div className="flex items-center gap-2">
@@ -70,12 +94,29 @@ function CustomersPage() {
         <table className="w-full min-w-170 text-left">
           <thead><tr className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#9aa095]">{columns.map((column) => <th key={column.key} className="px-5 py-3">{column.label}</th>)}<th className="px-5 py-3 text-right">Actions</th></tr></thead>
           <tbody className="divide-y divide-[#f0f1ed]">
-            {filteredRecords.map((record, index) => <tr key={`${record.email}-${index}`} className="text-xs hover:bg-[#fbfcf9]">{columns.map((column) => <td key={column.key} className="px-5 py-4">{column.key === "status" ? <span className="inline-flex items-center gap-1.5 rounded-full bg-[#edf5e5] px-2.5 py-1 text-[10px] font-medium text-[#638046]"><span className="h-1.5 w-1.5 rounded-full bg-current" />{record.status}</span> : <span className={`${column.key === "customer" ? "font-semibold text-[#343d34]" : "text-[#687166]"}`}>{record[column.key]}</span>}</td>)}<td className="px-5 py-4 text-right"><button onClick={() => setRecords((current) => current.filter((item) => item !== record))} className="rounded-md border border-[#e6e9e1] px-2.5 py-1.5 text-[10px] font-medium text-[#747d72] hover:border-[#d7a998] hover:text-[#a35e4b]">Remove</button></td></tr>)}
-            {filteredRecords.length === 0 && <tr><td colSpan={columns.length + 1} className="px-6 py-12 text-center text-xs text-[#858d82]">No customers found. Try another search or add a customer.</td></tr>}
+            {isLoading && <tr><td colSpan={columns.length + 1} className="px-6 py-12 text-center text-xs text-[#858d82]">Loading customers…</td></tr>}
+            {filteredRecords.map((record) => 
+            <tr key={record.customerId ?? record.email} className="text-xs hover:bg-[#fbfcf9]">
+              {columns.map((column) => 
+              <td key={column.key} className="px-5 py-4">
+                {column.key === "status" ? 
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#edf5e5] px-2.5 py-1 text-[10px] font-medium text-[#638046]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                  {record.status}
+                  </span> : 
+                  <span className={`${column.key === "customer" ? "font-semibold text-[#343d34]" : "text-[#687166]"}`}>{record[column.key]}</span>}
+                    </td>)}
+                  <td className="px-5 py-4 text-right">
+                    <div className="inline-flex items-center gap-1">
+                      <button type="button" className="rounded-md border border-[#e6e9e1] px-2.5 py-1.5 text-[10px] font-medium text-[#596257] hover:bg-[#f8f9f6]">View</button>
+                      <button type="button" className="rounded-md border border-[#e6e9e1] px-2.5 py-1.5 text-[10px] font-medium text-[#596257] hover:bg-[#f8f9f6]">Update</button>
+                    </div>
+                  </td></tr>)}
+            {!isLoading && filteredRecords.length === 0 && <tr><td colSpan={columns.length + 1} className="px-6 py-12 text-center text-xs text-[#858d82]">{loadError ? "Customers could not be loaded." : "No customers found. Try another search or add a customer."}</td></tr>}
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between border-t border-[#edf0e9] px-6 py-3 text-[11px] text-[#8c9489]"><span>Showing {filteredRecords.length} of {records.length} customers</span><span>Demo data · changes aren’t saved to a backend</span></div>
+      <div className="flex items-center justify-between border-t border-[#edf0e9] px-6 py-3 text-[11px] text-[#8c9489]"><span>Showing {filteredRecords.length} of {records.length} customers</span><span>Changes made here are temporary and aren’t saved to the backend.</span></div>
     </section>
     {showForm && <AddCustomerForm onClose={() => setShowForm(false)} onSave={addCustomer} />}
   </AdminLayout>
