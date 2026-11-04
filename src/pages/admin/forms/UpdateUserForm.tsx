@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react"
 import { Icon } from "../AdminSidebar"
+import CarLoadingModal from "../../../components/CarLoadingModal"
 import type { StaffUser, UpdateUserRequest, UserStatus } from "../../../features/users/users.api"
-import type { UserRole } from "../../../features/users/user-roles.api"
+import type { UserRole } from "../../../features/roles/user-roles.api"
 
 type UpdateUserFormProps = {
   user: StaffUser
@@ -53,7 +54,7 @@ function UpdateUserForm({ user, roles, branches, onClose, onSave }: UpdateUserFo
   const selectClass = `${inputClass} bg-white`
   const roleIsAvailable = roles.some((role) => role.userRoleId === values.userRoleId)
 
-  return <div role="presentation" className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !isSubmitting) onClose() }}>
+  return <><div role="presentation" className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !isSubmitting) onClose() }}>
     <section role="dialog" aria-modal="true" aria-labelledby="update-user-title" className="max-h-[calc(100vh-2rem)] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
       <div className="flex items-start justify-between gap-4">
         <div><h2 id="update-user-title" className="text-lg font-semibold">Update user</h2><p className="mt-1 text-xs text-[#858d82]">Edit account details and access status.</p></div>
@@ -89,7 +90,7 @@ function UpdateUserForm({ user, roles, branches, onClose, onSave }: UpdateUserFo
         </div>
       </form>
     </section>
-  </div>
+  </div><CarLoadingModal isOpen={isSubmitting} message="Saving user..." /></>
 }
 
 export default UpdateUserForm

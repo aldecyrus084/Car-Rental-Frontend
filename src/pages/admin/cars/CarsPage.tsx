@@ -54,7 +54,7 @@ function CarsPage() {
   return <AdminLayout eyebrow="Administration / Cars" title={<>MOTION <span className="font-normal text-[#899187]">· Car inventory</span></>}>
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-[#8b9388]">Fleet workspace</p><h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]">Car inventory</h2><p className="mt-1.5 text-sm text-[#798177]">Manage vehicles, availability, and branch assignments.</p></div>
-      <button onClick={() => setShowForm(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#192820] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#293b30]"><Icon name="plus" className="h-4 w-4" />Add car</button>
+      <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#192820] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#293b30]"><Icon name="plus" className="h-4 w-4" />Add car</button>
     </div>
     <section aria-label="Fleet summary" className="mt-7 grid gap-3 sm:grid-cols-3">
       <article className="rounded-xl border border-[#e7e9e2] bg-white p-5"><p className="text-xs font-medium text-[#788077]">Total vehicles</p><p className="mt-3 text-2xl font-semibold tracking-tight">{records.length.toString().padStart(2, "0")}</p></article>

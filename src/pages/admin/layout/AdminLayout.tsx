@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import AdminSidebar, { Icon } from "../AdminSidebar"
+import { useLoadingModal } from "../../../components/LoadingModalContext"
 
 type AdminLayoutProps = {
   eyebrow: string
@@ -9,6 +10,8 @@ type AdminLayoutProps = {
 }
 
 function AdminLayout({ eyebrow, title, toolbar, children }: AdminLayoutProps) {
+  
+  
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return <div className="min-h-screen bg-[#f5f6f2] text-[#202720] antialiased">

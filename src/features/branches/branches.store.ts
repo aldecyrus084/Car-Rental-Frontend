@@ -1,3 +1,6 @@
+import { BRANCH_URI } from "../../services/api/endpoints"
+import { API_REQUEST } from "../../types/apiRequest"
+
 export type Branch = {
   branchId: string
   name: string
@@ -12,28 +15,18 @@ export type BranchValues = Omit<Branch, "branchId">
 
 const STORAGE_KEY = "motionBranches"
 
-function isBranch(value: unknown): value is Branch {
-  if (typeof value !== "object" || value === null) return false
-  const branch = value as Partial<Branch>
-  return typeof branch.branchId === "string"
-    && typeof branch.name === "string"
-    && typeof branch.address === "string"
-    && typeof branch.city === "string"
-    && typeof branch.province === "string"
-    && typeof branch.contactNumber === "string"
-    && typeof branch.isActive === "boolean"
-}
+export async function getBranches(): Promise<Branch[]> {
+  try
+  {
+    const response = await API_REQUEST<Branch[]>(BRANCH_URI);
+    console.log(response);
 
-export function getBranches(): Branch[] {
-  if (typeof window === "undefined") return []
-
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY)
-    if (!stored) return []
-    const branches: unknown = JSON.parse(stored)
-    return Array.isArray(branches) && branches.every(isBranch) ? branches : []
-  } catch {
-    return []
+    return Array.isArray(response.data) ? response.data : [];
+  }
+  catch(error)
+  {
+    console.error(error);
+    return [];
   }
 }
 

@@ -1,10 +1,4 @@
-export const API_ENDPOINTS = {
-  branches: "/Branch",
-  branch: (id: string) => `/branch/${encodeURIComponent(id)}`,
-  users: "/User",
-  user: (email: string) => `/User/${encodeURIComponent(email)}`,
-  customers: "/Customer",
-  userRoles: "/user-role",
-  userRole: (id: string) => `/user-role/${encodeURIComponent(id)}`,
-  userStatus: (email: string) => `/User/${encodeURIComponent(email)}/status`,
-} as const
+export const BASE_URL = "https://localhost:7249/api/";
+
+export const BRANCH_URI = "branch";
+export const USER_ROLES_URI = "user-role";

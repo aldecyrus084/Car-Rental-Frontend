@@ -36,7 +36,7 @@ function VehicleTypesPage() {
   return <AdminLayout eyebrow="Administration / Vehicle types" title={<>MOTION <span className="font-normal text-[#899187]">· Vehicle categories</span></>}>
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-[#8b9388]">Fleet setup</p><h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]">Vehicle types</h2><p className="mt-1.5 text-sm text-[#798177]">Manage vehicle specifications and daily rental rates.</p></div>
-      <button onClick={() => setShowForm(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#192820] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#293b30]"><Icon name="plus" className="h-4 w-4" />Add vehicle type</button>
+      <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#192820] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#293b30]"><Icon name="plus" className="h-4 w-4" />Add vehicle type</button>
     </div>
 
     <section aria-label="Vehicle type summary" className="mt-7 grid gap-3 sm:grid-cols-3">

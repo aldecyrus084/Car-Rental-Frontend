@@ -1,6 +1,3 @@
-import { apiRequest } from "../../services/api/client"
-import { API_ENDPOINTS } from "../../services/api/endpoints"
-
 export type Customer = {
   customerId: string
   fullName: string
@@ -8,28 +5,30 @@ export type Customer = {
   contactNumber: string
   rentals: number
   status: string
+  customersNumber?: string
+  customerNumber?: string
+  firstName?: string
+  middleName?: string | null
+  lastName?: string
+  dateOfBirth?: string
+  gender?: string
+  phoneNumber?: string
+  address?: string
+  city?: string
+  province?: string
+  postalCode?: string | null
+  emergencyContactName?: string | null
+  emergencyNumber?: string | null
+  documents?: CustomerDocument[]
 }
 
-type ApiListResponse<T> = T[] | { message?: string; isSuccess?: boolean; data: T[] }
-
-function isCustomer(value: unknown): value is Customer {
-  if (typeof value !== "object" || value === null) return false
-  const customer = value as Partial<Customer>
-  return typeof customer.customerId === "string"
-    && typeof customer.fullName === "string"
-    && typeof customer.email === "string"
-    && typeof customer.contactNumber === "string"
-    && typeof customer.rentals === "number"
-    && typeof customer.status === "string"
+export type CustomerDocument = {
+  documentId?: string
+  fileName: string
+  fileUrl?: string
+  contentType?: string
 }
 
-export async function getCustomers(signal?: AbortSignal): Promise<Customer[]> {
-  const response = await apiRequest<ApiListResponse<Customer>>(API_ENDPOINTS.customers, { signal })
-  if (!Array.isArray(response) && response.isSuccess === false) {
-    throw new Error(response.message || "Unable to load customers.")
-  }
-
-  const customers = Array.isArray(response) ? response : response.data
-  if (!customers.every(isCustomer)) throw new Error("The server returned invalid customer data.")
-  return customers
-}
+export type CustomerDetails = Partial<Omit<Customer, "customerId">> & Pick<Customer, "customerId">
+export type UpdateCustomerRequest = Partial<Omit<CustomerDetails, "customerId" | "rentals" | "documents">>
+export type CustomerStatus = "Active" | "Inactive" | "Blocked"

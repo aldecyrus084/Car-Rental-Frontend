@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react"
 import { Icon } from "../AdminSidebar"
+import CarLoadingModal from "../../../components/CarLoadingModal"
 import type { CreateUserRequest } from "../../../features/users/users.api"
-import type { UserRole } from "../../../features/users/user-roles.api"
+import type { UserRole } from "../../../features/roles/user-roles.api"
 
 type AddUserFormProps = {
     roles: UserRole[]
@@ -75,7 +76,7 @@ function AddUserForm({ roles, rolesLoadError, branches, onClose, onSave }: AddUs
         }
     }
 
-    return <div role="presentation" className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
+    return <><div role="presentation" className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
         <section role="dialog" aria-modal="true" aria-labelledby="user-form-title" className="max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4"><div><h2 id="user-form-title" className="text-lg font-semibold">Add user</h2><p className="mt-1 text-xs text-[#858d82]">Create an account for a member of your team.</p></div><button aria-label="Close user form" onClick={onClose} className="rounded-lg p-1.5 text-[#788077] hover:bg-[#f2f4ef]"><Icon name="close" className="h-5 w-5" /></button></div>
             <form onSubmit={submit} className="mt-5 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -91,7 +92,7 @@ function AddUserForm({ roles, rolesLoadError, branches, onClose, onSave }: AddUs
                 <div className="col-span-full flex items-center justify-between gap-3 border-t border-[#edf0e9] pt-4">{submitError && <p role="alert" className="text-xs text-[#a35e4b]">{submitError}</p>}<div className="ml-auto flex gap-2"><button type="button" onClick={onClose} disabled={isSubmitting} className="rounded-lg border border-[#e1e5dc] px-4 py-2.5 text-xs font-semibold text-[#596257] disabled:opacity-50">Cancel</button><button type="submit" disabled={isSubmitting} className="rounded-lg bg-[#192820] px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-wait disabled:opacity-60">{isSubmitting ? "Creating…" : "Create user"}</button></div></div>
             </form>
         </section>
-    </div>
+    </div><CarLoadingModal isOpen={isSubmitting} message="Creating user..." /></>
 }
 
 export default AddUserForm

@@ -1,17 +1,12 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Icon } from "../AdminSidebar"
 import AddUserForm from "../forms/AddUserForm"
 import UpdateUserForm from "../forms/UpdateUserForm"
 import AdminLayout from "../layout/AdminLayout"
-import { createUser, getUsers, updateUser, type StaffUser } from "../../../features/users/users.api"
-import type { UserRole } from "../../../features/users/user-roles.api"
+import type { CreateUserRequest, StaffUser, UpdateUserRequest } from "../../../features/users/users.api"
+import type { UserRole } from "../../../features/roles/user-roles.api"
 import { getBranches } from "../../../features/branches/branches.store"
-
-type UsersPageProps = {
-  roles: UserRole[]
-  rolesLoadError: string
-}
-
+ 
 function exportUsers(users: StaffUser[]) {
   const rows = [
     ["Name", "Email", "Phone number", "Role", "Status"],
@@ -26,33 +21,15 @@ function exportUsers(users: StaffUser[]) {
   URL.revokeObjectURL(url)
 }
 
-function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
+function UsersPage() {
   const [users, setUsers] = useState<StaffUser[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadError, setLoadError] = useState("")
   const [search, setSearch] = useState("")
   const [roleFilter, setRoleFilter] = useState("All roles")
   const [statusFilter, setStatusFilter] = useState("All statuses")
   const [showForm, setShowForm] = useState(false)
   const [editingUser, setEditingUser] = useState<StaffUser | null>(null)
   const [selectedUser, setSelectedUser] = useState<StaffUser | null>(null)
-  const [branches, setBranches] = useState(() => getBranches().filter((branch) => branch.isActive).map((branch) => branch.name))
-
-  useEffect(() => {
-    const controller = new AbortController()
-    getUsers(controller.signal)
-      .then(setUsers)
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted) {
-          setLoadError(error instanceof Error ? error.message : "Unable to load users.")
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false)
-      })
-
-    return () => controller.abort()
-  }, [])
+  // const [branches, setBranches] = useState(() => getBranches().filter((branch) => branch.isActive).map((branch) => branch.name))
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch = `${user.name} ${user.email} ${user.phoneNumber} ${user.role}`.toLowerCase().includes(search.toLowerCase())
@@ -60,26 +37,11 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
     const matchesStatus = statusFilter === "All statuses" || user.status === statusFilter
     return matchesSearch && matchesRole && matchesStatus
   })
-  const activeCount = users.filter((user) => user.status === "Active").length
-  const cashierCount = users.filter((user) => user.role === "Cashier").length
-
-  const addUser = async (values: Parameters<typeof createUser>[0]) => {
-    const user = await createUser(values)
-    setUsers((current) => [user, ...current])
-    setShowForm(false)
-  }
-
-  const saveUser = async (values: Parameters<typeof updateUser>[1]) => {
-    if (!editingUser) return
-    const updatedUser = await updateUser(editingUser.userId, values)
-    setUsers((current) => current.map((user) => user.userId === editingUser.userId ? updatedUser : user))
-    setEditingUser(null)
-  }
-
+  
   return <AdminLayout eyebrow="Administration / Users" title={<>MOTION <span className="font-normal text-[#899187]">· User management</span></>}>
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-[#8b9388]">Team administration</p><h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]">Users</h2><p className="mt-1.5 text-sm text-[#798177]">Manage staff access, roles, and branch assignments.</p></div>
-      <button onClick={() => { setBranches(getBranches().filter((branch) => branch.isActive).map((branch) => branch.name)); setShowForm(true) }} className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#192820] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#293b30]"><Icon name="plus" className="h-4 w-4" />Add user</button>
+      <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#192820] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#293b30]"><Icon name="plus" className="h-4 w-4" />Add user</button>
     </div>
 
     <section aria-label="User summary" className="mt-7 grid gap-3 sm:grid-cols-3">
@@ -89,7 +51,6 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
     </section>
 
     <section className="mt-4 rounded-xl border border-[#e7e9e2] bg-white">
-      {loadError && <p role="alert" className="border-b border-[#f0d9d2] bg-[#fff8f5] px-5 py-3 text-xs text-[#a35e4b]">{loadError}</p>}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#edf0e9] px-5 py-4 sm:px-6">
         <div><h3 className="text-sm font-semibold">Team directory</h3><p className="mt-1 text-xs text-[#858d82]">Manage account roles and access status</p></div>
         <div className="flex flex-wrap items-center gap-2">
@@ -103,7 +64,6 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
         <table className="w-full min-w-[760px] text-left">
           <thead><tr className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#9aa095]"><th className="px-5 py-3">Full name</th><th className="px-5 py-3">Email</th><th className="px-5 py-3">Phone number</th><th className="px-5 py-3">Role</th><th className="px-5 py-3">Status</th><th className="px-5 py-3 text-right">Actions</th></tr></thead>
           <tbody className="divide-y divide-[#f0f1ed]">
-            {isLoading && <tr><td colSpan={6} className="px-6 py-12 text-center text-xs text-[#858d82]">Loading users…</td></tr>}
             {filteredUsers.map((user) => <tr key={user.email} className="text-xs hover:bg-[#fbfcf9]">
               <td className="px-5 py-4 font-semibold text-[#343d34]">{user.name}</td>
               <td className="px-5 py-4 text-[#687166]">{user.email}</td>
@@ -112,11 +72,11 @@ function UsersPage({ roles, rolesLoadError }: UsersPageProps) {
               <td className="px-5 py-4"><span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium ${user.status === "Active" ? "bg-[#edf5e5] text-[#638046]" : "bg-[#f8ece8] text-[#a35e4b]"}`}><span className="h-1.5 w-1.5 rounded-full bg-current" />{user.status}</span></td>
               <td className="px-5 py-4 text-right"><div className="inline-flex items-center gap-1"><button type="button" onClick={() => { setBranches(getBranches().filter((branch) => branch.isActive).map((branch) => branch.name)); setEditingUser(user) }} className="rounded-md border border-[#e6e9e1] px-2 py-1.5 text-[10px] font-medium text-[#596257] hover:bg-[#f8f9f6]">Update</button><button type="button" onClick={() => setSelectedUser(user)} className="rounded-md border border-[#e6e9e1] px-2 py-1.5 text-[10px] font-medium text-[#596257] hover:bg-[#f8f9f6]">View</button></div></td>
             </tr>)}
-            {!isLoading && filteredUsers.length === 0 && <tr><td colSpan={6} className="px-6 py-12 text-center text-xs text-[#858d82]">{loadError ? "Users could not be loaded." : "No users match these filters."}</td></tr>}
+            {filteredUsers.length === 0 && <tr><td colSpan={6} className="px-6 py-12 text-center text-xs text-[#858d82]">No users match these filters.</td></tr>}
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between border-t border-[#edf0e9] px-6 py-3 text-[11px] text-[#8c9489]"><span>Showing {filteredUsers.length} of {users.length} users</span><span>Live user directory</span></div>
+      <div className="flex items-center justify-between border-t border-[#edf0e9] px-6 py-3 text-[11px] text-[#8c9489]"><span>Showing {filteredUsers.length} of {users.length} users</span><span>API integration not connected.</span></div>
     </section>
     {showForm && <AddUserForm roles={roles} rolesLoadError={rolesLoadError} branches={branches} onClose={() => setShowForm(false)} onSave={addUser} />}
     {editingUser && <UpdateUserForm user={editingUser} roles={roles} branches={branches} onClose={() => setEditingUser(null)} onSave={saveUser} />}
