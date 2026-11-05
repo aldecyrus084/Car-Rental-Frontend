@@ -1,17 +1,105 @@
-import { useState} from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useState } from 'react'
+import { API_REQUEST } from '../../types/apiRequest';
+import { useLoadingModal } from '../../components/LoadingModalContext';
+import { LOGIN_URI } from '../../services/api/endpoints';
+import { useAuth } from '../../context/AuthContext';
+
+type LoginResponse = {
+  token: string;
+}
 
 const Login = () => {
-  // Simple state for each field - easy to read and follow
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
- 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const { showLoader, hideLoader } = useLoadingModal();
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
- 
-    console.log({ username, password, rememberMe });
+
+    setError(null);
+    setSubmitting(true);
+    showLoader("Logging in, Please wait...");
+
+    try {
+      const response = await API_REQUEST<LoginResponse>(LOGIN_URI, {
+        method: "POST",
+        body: JSON.stringify({
+          username,
+          password
+        })
+      });
+
+      if (!response.isSuccess) {
+        throw new Error(response.message || "Login failed.");
+      }
+
+      // Save token and authenticate the user.
+      login(response.data?.token, rememberMe);
+
+      // Get the previously requested route.
+      const from = (
+        location.state as { from?: { pathname?: string } } | null
+      )?.from?.pathname;
+
+      // Determine default dashboard based on role.
+      const decodedRoles = response.data.token;
+
+      // The user state is updated by AuthContext.
+      // Decode the token to determine the destination.
+      const { jwtDecode } = await import("jwt-decode");
+
+      const payload = jwtDecode<{
+        role?: string | string[];
+        roles?: string | string[];
+        [key: string]: unknown;
+      }>(decodedRoles);
+
+      const roleClaim =
+        payload.role ??
+        payload.roles ??
+        payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+      const roles = Array.isArray(roleClaim)
+        ? roleClaim
+        : typeof roleClaim === "string"
+          ? [roleClaim]
+          : [];
+
+      const normalizedRoles = roles.map(role => role.toLowerCase());
+
+      let defaultRoute = "/unauthorized";
+
+      if (normalizedRoles.includes("admin")) {
+        defaultRoute = "/admin";
+      } else if (normalizedRoles.includes("manager")) {
+        defaultRoute = "/manager";
+      } else if (normalizedRoles.includes("employee")) {
+        defaultRoute = "/employee";
+      }
+
+      navigate(from ?? defaultRoute, { replace: true });
+
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred."
+      );
+    } finally {
+      setSubmitting(false);
+      hideLoader();
+    }
   };
- 
+
+
   return (
     <div className="min-h-screen flex bg-slate-100">
       {/* LEFT SIDE: reserved image area for car hero / logo */}
@@ -23,7 +111,7 @@ const Login = () => {
           className="w-full h-full object-cover"
         />
       </div>
- 
+
       {/* RIGHT SIDE: login form */}
       <div className="flex w-full lg:w-1/2 items-center justify-center p-8">
         <div className="w-full max-w-sm">
@@ -35,14 +123,14 @@ const Login = () => {
               className="h-12 w-auto"
             />
           </div>
- 
+
           <h1 className="text-2xl font-semibold text-slate-800 text-center mb-1">
             Admin Login
           </h1>
           <p className="text-sm text-slate-500 text-center mb-6">
             Sign in to manage your dashboard
           </p>
- 
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div>
@@ -59,7 +147,7 @@ const Login = () => {
                 required
               />
             </div>
- 
+
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
@@ -75,7 +163,7 @@ const Login = () => {
                 required
               />
             </div>
- 
+
             {/* Remember me + Forgot password */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 text-slate-600">
@@ -87,14 +175,15 @@ const Login = () => {
                 />
                 Remember me
               </label>
- 
+
               <a href="/forgot-password" className="text-slate-800 hover:underline">
                 Forgot password?
               </a>
             </div>
- 
+
             {/* Submit button */}
             <button
+              disabled={submitting}
               type="submit"
               className="w-full rounded-lg bg-slate-800 text-white py-2 font-medium hover:bg-slate-700 transition-colors"
             >
@@ -105,6 +194,6 @@ const Login = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Login
